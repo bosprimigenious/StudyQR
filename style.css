@@ -133,3 +133,22 @@ footer {
     font-size: 13px;
     margin-top: 40px;
 }
+
+/* 新增使用次数框样式 */
+.usage-box {
+    background-color: #f9f2e7;
+    border: 2px solid #a66319;
+    padding: 12px 18px;
+    margin-top: 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #6a3e1a;
+    box-shadow: 0 0 6px rgba(166, 102, 25, 0.2);
+}
+
+.usage-box h3 {
+    margin: 0 0 8px;
+    color: #a66319;
+    font-size: 16px;
+    font-weight: bold;
+}

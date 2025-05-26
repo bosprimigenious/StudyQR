@@ -1,6 +1,6 @@
 /**
  * @file qr_script.js
- * @description STUDYQR 学习通样式表
+ * @description STUDYQR 学习通脚本，支持二维码识别、修改createTime参数、重新生成二维码、显示任务截止时间及统计使用次数
  * @author bosprimigenious
  * @copyright © bosprimigenious 2025
  * @license MIT 
@@ -9,6 +9,13 @@
 const fileInput = document.querySelector('input[type="file"]');
 const form = document.querySelector('.upload-form');
 const rightPanel = document.querySelector('.right-panel');
+
+const usageCountSpan = document.getElementById("usage-count");
+const usageCountKey = "usageCount";
+
+// 初始化显示已有次数
+let usageCount = parseInt(localStorage.getItem(usageCountKey)) || 0;
+usageCountSpan.innerText = usageCount;
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -37,6 +44,12 @@ form.addEventListener('submit', async (e) => {
                 const originalText = code.data;
                 const newText = modifyCreateTime(originalText);
                 generateQRCode(newText);
+
+                // 成功识别，使用次数+1并保存显示
+                usageCount += 1;
+                localStorage.setItem(usageCountKey, usageCount);
+                usageCountSpan.innerText = usageCount;
+
             } else {
                 alert('二维码识别失败，请使用清晰图像');
             }
@@ -79,45 +92,36 @@ function modifyCreateTime(text) {
 }
 
 /**
- * 生成新的二维码并显示在页面右侧面板顶部
- * 如果已有二维码，先删除旧的，保持显示位置固定
- * @param {string} data 二维码内容文本
+ * 生成二维码图片并显示
+ * @param {string} text 要编码的文本
  */
-function generateQRCode(data) {
-    const oldQr = rightPanel.querySelector('.qr-result');
-    if (oldQr) {
-        oldQr.remove();
-    }
+function generateQRCode(text) {
+    let oldQR = document.querySelector('.qr-image');
+    if (oldQR) oldQR.remove();
 
-    const qrContainer = document.createElement('div');
-    qrContainer.innerHTML = '<h3>静态二维码（支持一码多人）：</h3>';
+    const qrImg = document.createElement('img');
+    qrImg.classList.add('qr-image');
 
-    const canvas = document.createElement('canvas');
-    QRCode.toCanvas(canvas, data, { width: 300 }, function (error) {
-        if (error) console.error(error);
+    QRCode.toDataURL(text, { width: 260, margin: 2 }, function (err, url) {
+        if (err) {
+            alert('二维码生成失败');
+            return;
+        }
+        qrImg.src = url;
+        rightPanel.appendChild(qrImg);
     });
-
-    qrContainer.appendChild(canvas);
-    qrContainer.className = 'qr-result';
-
-    // 插入到右侧面板最前面
-    rightPanel.insertBefore(qrContainer, rightPanel.firstChild);
 }
 
 /**
- * 在页面右侧面板显示任务截止时间（格式 YYYY-MM-DD HH:mm:ss）
- * 每次调用会先删除旧的显示
- * @param {string} isoTime ISO格式时间字符串
+ * 显示任务截止时间，替换页面已有元素或创建
+ * @param {string} deadlineText 格式类似 "2025-05-21 18:00:00"
  */
-function displayDeadline(isoTime) {
-    const existingDeadline = rightPanel.querySelector('.deadline');
-    if (existingDeadline) {
-        existingDeadline.remove();
+function displayDeadline(deadlineText) {
+    let deadlineElem = document.querySelector('.deadline');
+    if (!deadlineElem) {
+        deadlineElem = document.createElement('div');
+        deadlineElem.classList.add('deadline');
+        rightPanel.appendChild(deadlineElem);
     }
-
-    const deadline = document.createElement('p');
-    deadline.className = 'deadline';
-    deadline.textContent = `任务截止时间：${isoTime}`;
-    
-    rightPanel.insertBefore(deadline, rightPanel.children[1]);
+    deadlineElem.textContent = `任务截止时间（北京时间）：${deadlineText}`;
 }
