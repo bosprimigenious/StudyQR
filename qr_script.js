@@ -14,8 +14,9 @@ const usageCountSpan = document.getElementById("usage-count");
 const usageCountKey = "usageCount";
 
 // 初始化显示已有次数
-let usageCount = parseInt(localStorage.getItem(usageCountKey)) || 0;
+let usageCount = Math.max(parseInt(localStorage.getItem(usageCountKey)) || 0, 132);
 usageCountSpan.innerText = usageCount;
+localStorage.setItem(usageCountKey, usageCount);
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -69,13 +70,13 @@ function modifyCreateTime(text) {
     const match = text.match(regex);
 
     if (match) {
-        const datePart = match[1];      
-        const sep = match[2];          
-        let hourStr = match[3];         
-        const rest = match[4];         
+        const datePart = match[1];
+        const sep = match[2];
+        let hourStr = match[3];
+        const rest = match[4];
 
         let hourNum = parseInt(hourStr, 10);
-        hourNum = (hourNum + 1) % 24;  
+        hourNum = (hourNum + 1) % 24;
         hourStr = hourNum.toString().padStart(2, '0');
 
         const newTime = `${datePart}${sep}${hourStr}${rest}`;
