@@ -1,31 +1,41 @@
-<!--
-  @file index.html
-  @description STUDYQR 学习通样式表
-  @author bosprimigenious
-  @copyright © bosprimigenious 2025
-  @license MIT
-  @date 2025-05-21
--->
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8" />
     <title>STUDYQR学习通</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="style.css" />
+
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script defer src="qr_script.js"></script>
+
+    <style>
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: linear-gradient(90deg, #f7dc6f, #2c3e50, #f7dc6f);
+            background-size: 200% 200%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: gradientShift 4s ease infinite;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="left-panel">
+        <aside class="left-panel">
             <div class="logo-box">
                 <img src="logo.jpg" alt="Logo" class="logo" />
             </div>
-        </div>
-        <div class="right-panel" id="result-panel">
-            <div class="reminder-text">
-                <h3>关于课堂签到与学习辅助的温馨提醒</h3>
+        </aside>
+
+        <main class="right-panel" id="result-panel">
+            <section class="reminder-text">
+                <h3 class="gradient-text">关于课堂签到与学习辅助的温馨提醒</h3>
                 <p>为帮助大家更好地完成学习任务、确保课堂签到无误，请各位同学配合以下事项：</p>
                 <ul>
                     <li>照片提交：只需提交动态二维码的随意一张照片。</li>
@@ -35,23 +45,23 @@
                 <p>目标：通过有序协作，助力大家高效学习，杜绝因流程问题影响课堂参与。如有疑问，请随时沟通～</p>
                 <p>图片 logo 来源于 xhs，侵权联系删除～更好的建议欢迎联系。</p>
                 <p>本项目开发时间短，有任何建议和意见欢迎联系开发者 <span id="email"></span></p>
-            </div>
+            </section>
 
-            <div class="usage-box">
+            <section class="usage-box">
                 <h3>工具使用次数</h3>
                 <p>本网站已服务大家 <span id="usage-count">0</span> 次</p>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <h2>上传含有二维码图片（png/jpg/jpeg），我们将自动识别内容并输出静态二维码，有效时间为一小时</h2>
+    <h2 class="upload-title gradient-text">上传含有二维码图片（png/jpg/jpeg），我们将自动识别内容并输出静态二维码，有效时间为一小时</h2>
 
-    <form class="upload-form">
-        <input type="file" accept=".png,.jpg,.jpeg" required />
+    <form class="upload-form" autocomplete="off">
+        <input type="file" accept=".png,.jpg,.jpeg" required id="fileInput" />
         <button type="submit">上传识别并输出静态二维码</button>
     </form>
 
-    <footer>
+    <footer class="footer">
         <p class="copyright">© bosprimigenious</p>
     </footer>
 
@@ -61,4 +71,5 @@
         document.getElementById("email").innerText = user + "@" + domain;
     </script>
 </body>
+
 </html>

@@ -6,6 +6,7 @@
  * @license MIT 
  * @date 2025-05-21
  */
+
 const fileInput = document.querySelector('input[type="file"]');
 const form = document.querySelector('.upload-form');
 const rightPanel = document.querySelector('.right-panel');
@@ -21,17 +22,74 @@ localStorage.setItem(usageCountKey, usageCount);
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const submitBtn = form.querySelector('button');
     const file = fileInput.files[0];
-    if (!file) return;
+    if (!file) {
+        showError('请选择二维码图片文件');
+        return;
+    }
+    // 简单文件类型检查
+    if (!/\.(png|jpg|jpeg)$/i.test(file.name)) {
+        showError('文件格式不支持，仅限 PNG/JPG/JPEG');
+        return;
+    }
 
-    const reader = new FileReader();
-    reader.onload = async function (event) {
-        const imageDataUrl = event.target.result;
+    // 禁用按钮，显示loading
+    submitBtn.disabled = true;
+    submitBtn.textContent = '处理中...';
 
+    try {
+        const imageDataUrl = await readFileAsync(file);
+        const codeData = await decodeQRCode(imageDataUrl);
+        if (!codeData) {
+            showError('二维码识别失败，请使用清晰图像');
+            resetButton();
+            return;
+        }
+        const newText = modifyCreateTime(codeData);
+        await generateQRCode(newText);
+
+        usageCount += 1;
+        localStorage.setItem(usageCountKey, usageCount);
+        usageCountSpan.innerText = usageCount;
+
+    } catch (err) {
+        showError(err.message || '发生未知错误');
+    } finally {
+        resetButton();
+    }
+
+    function resetButton() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '上传识别并输出静态二维码';
+    }
+});
+
+/**
+ * 读取文件转成 DataURL，返回 Promise
+ * @param {File} file 
+ * @returns {Promise<string>}
+ */
+function readFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('文件读取失败'));
+        reader.readAsDataURL(file);
+    });
+}
+
+/**
+ * 利用 Canvas 和 jsQR 解码二维码，返回二维码字符串内容
+ * @param {string} imageDataUrl 
+ * @returns {Promise<string|null>}
+ */
+function decodeQRCode(imageDataUrl) {
+    return new Promise((resolve) => {
         const image = new Image();
         image.src = imageDataUrl;
 
-        image.onload = function () {
+        image.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = image.width;
@@ -41,23 +99,12 @@ form.addEventListener('submit', async (e) => {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(imageData.data, canvas.width, canvas.height);
 
-            if (code) {
-                const originalText = code.data;
-                const newText = modifyCreateTime(originalText);
-                generateQRCode(newText);
-
-                // 成功识别，使用次数+1并保存显示
-                usageCount += 1;
-                localStorage.setItem(usageCountKey, usageCount);
-                usageCountSpan.innerText = usageCount;
-
-            } else {
-                alert('二维码识别失败，请使用清晰图像');
-            }
+            resolve(code ? code.data : null);
         };
-    };
-    reader.readAsDataURL(file);
-});
+
+        image.onerror = () => resolve(null);
+    });
+}
 
 /**
  * 只修改 createTime 参数时间字符串中 T 后的小时数，加1小时
@@ -88,28 +135,32 @@ function modifyCreateTime(text) {
         return newText;
     }
 
-    alert('未检测到 createTime 参数');
+    showError('未检测到 createTime 参数');
     return text;
 }
 
 /**
- * 生成二维码图片并显示
+ * 生成二维码图片并显示，返回 Promise
  * @param {string} text 要编码的文本
+ * @returns {Promise<void>}
  */
 function generateQRCode(text) {
-    let oldQR = document.querySelector('.qr-image');
-    if (oldQR) oldQR.remove();
+    return new Promise((resolve, reject) => {
+        let oldQR = document.querySelector('.qr-image');
+        if (oldQR) oldQR.remove();
 
-    const qrImg = document.createElement('img');
-    qrImg.classList.add('qr-image');
+        const qrImg = document.createElement('img');
+        qrImg.classList.add('qr-image');
 
-    QRCode.toDataURL(text, { width: 260, margin: 2 }, function (err, url) {
-        if (err) {
-            alert('二维码生成失败');
-            return;
-        }
-        qrImg.src = url;
-        rightPanel.appendChild(qrImg);
+        QRCode.toDataURL(text, { width: 260, margin: 2 }, function (err, url) {
+            if (err) {
+                reject(new Error('二维码生成失败'));
+                return;
+            }
+            qrImg.src = url;
+            rightPanel.appendChild(qrImg);
+            resolve();
+        });
     });
 }
 
@@ -125,4 +176,19 @@ function displayDeadline(deadlineText) {
         rightPanel.appendChild(deadlineElem);
     }
     deadlineElem.textContent = `任务截止时间（北京时间）：${deadlineText}`;
+}
+
+/**
+ * 显示错误信息，3.5秒后自动消失
+ * @param {string} msg 
+ */
+function showError(msg) {
+    let errElem = document.querySelector('.error');
+    if (!errElem) {
+        errElem = document.createElement('div');
+        errElem.classList.add('error');
+        rightPanel.appendChild(errElem);
+    }
+    errElem.textContent = msg;
+    setTimeout(() => { errElem.textContent = ''; }, 3500);
 }

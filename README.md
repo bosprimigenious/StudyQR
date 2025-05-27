@@ -76,3 +76,21 @@ StudyQr/
 ├── script.js # 主逻辑脚本
 └── logo.png
  ```
+
+ ## 优化方向
+ ```
+ StudyQr/
+├── index.html          # 主页面，上传二维码、显示结果
+├── style.css           # 样式表，统一管理页面样式（酷炫渐变动效等）
+├── script.js           # 主逻辑脚本，实现二维码识别、修改、生成、交互
+├── logo.png            # 网站 Logo 图片
+├── README.md           # 项目说明文档，介绍功能、技术栈、使用方法
+├── LICENSE             # 许可证文件，比如 MIT 许可
+├── assets/             # 资源文件夹，存放额外图片、字体等
+│   └── ...
+├── libs/               # 第三方库文件，如 jsQR.js、qrcode.min.js 等
+│   └── jsQR.js
+│   └── qrcode.min.js
+└── docs/               # 项目文档或演示相关页面（可选）
+    └── usage.html      # 使用说明页面
+```
