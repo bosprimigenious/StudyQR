@@ -4,7 +4,9 @@
  * @author bosprimigenious
  * @copyright © bosprimigenious 2025
  * @license MIT 
- * @date 2025-05-21
+ * @date 2025-09-15
+ * 
+ * 依赖 jsQR 和 qrcode 库
  */
 
 const fileInput = document.querySelector('input[type="file"]');
@@ -28,9 +30,10 @@ form.addEventListener('submit', async (e) => {
         showError('请选择二维码图片文件');
         return;
     }
-    // 简单文件类型检查
-    if (!/\.(png|jpg|jpeg)$/i.test(file.name)) {
-        showError('文件格式不支持，仅限 PNG/JPG/JPEG');
+    // 放宽文件类型检查
+    const allowedExtensions = /\.(png|jpg|jpeg|webp|gif)$/i;
+    if (!allowedExtensions.test(file.name)) {
+        showError('文件格式不支持，仅限 PNG/JPG/JPEG/WEBP/GIF');
         return;
     }
 
@@ -46,6 +49,7 @@ form.addEventListener('submit', async (e) => {
             resetButton();
             return;
         }
+
         const newText = modifyCreateTime(codeData);
         await generateQRCode(newText);
 
@@ -81,20 +85,29 @@ function readFileAsync(file) {
 
 /**
  * 利用 Canvas 和 jsQR 解码二维码，返回二维码字符串内容
+ * 支持高分辨率、大尺寸、透明 PNG、webp/gif
  * @param {string} imageDataUrl 
  * @returns {Promise<string|null>}
  */
 function decodeQRCode(imageDataUrl) {
     return new Promise((resolve) => {
         const image = new Image();
+        image.crossOrigin = "Anonymous"; // 解决跨域/透明问题
         image.src = imageDataUrl;
 
         image.onload = () => {
+            // 对大尺寸图片缩放，保持性能
+            const maxSize = 1024;
+            let scale = 1;
+            if (image.width > maxSize || image.height > maxSize) {
+                scale = Math.min(maxSize / image.width, maxSize / image.height);
+            }
+
             const canvas = document.createElement('canvas');
+            canvas.width = image.width * scale;
+            canvas.height = image.height * scale;
             const ctx = canvas.getContext('2d');
-            canvas.width = image.width;
-            canvas.height = image.height;
-            ctx.drawImage(image, 0, 0);
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(imageData.data, canvas.width, canvas.height);

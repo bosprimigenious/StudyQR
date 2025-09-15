@@ -1,0 +1,20 @@
+{
+  "name": "studyqrjs",
+  "version": "1.0.0",
+  "description": "> 一个纯前端实现的二维码识别与时间参数调整工具，适用于课堂签到、学习任务提醒等场景。  \r > 本地运行，零后端，隐私安全。",
+  "main": "qr_script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bosprimigenious/StudyQR.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bosprimigenious/StudyQR/issues"
+  },
+  "homepage": "https://github.com/bosprimigenious/StudyQR#readme"
+}
