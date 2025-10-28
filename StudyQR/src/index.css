@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+/* 自定义微调 */
+.container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 桌面端略增大基础字号，移动端保持默认 */
+@media (min-width: 1024px) {
+  html { font-size: 17px; }
+}
+
+
